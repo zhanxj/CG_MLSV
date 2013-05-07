@@ -26,7 +26,7 @@ import com.zhanxj.mlsv.utils.Tools;
 public class ServerThread implements Runnable {
 
 	private static Logger LOG = LoggerFactory.getLogger(ServerThread.class);
-	@Override
+	
 	public void run() {
 		try {
 			final BufferedReader br = getReader(socket);
@@ -37,10 +37,10 @@ public class ServerThread implements Runnable {
 				if (ret != null) {
 					int l = ret.length;
 					if (l == 1) {
-						pw.println(new String(ret[0]));
+						pw.println(new String(ret[0].getBytes("ISO8859_1"),"GBK"));
 					} else {
 						for (int i = 0; i < l; i++) {
-							pw.println(new String(ret[i]));
+							pw.println(new String(ret[i].getBytes("ISO8859_1"),"GBK"));
 						}
 					}
 				}
@@ -83,7 +83,7 @@ public class ServerThread implements Runnable {
 
 	private BufferedReader getReader(final Socket socket) throws IOException {
 		final InputStream socketIn = socket.getInputStream();
-		return new BufferedReader(new InputStreamReader(socketIn));
+		return new BufferedReader(new InputStreamReader(socketIn,"GBK"));
 	}
 
 	public String[] echo(final String msg) {
@@ -103,7 +103,6 @@ public class ServerThread implements Runnable {
 						sl.addNewServer(gs);
 						ret = new String[1];
 						ret[0] = "ACServerLogin successful";
-						//log参数
 						Object[] logArgs=new Object[4];
 						logArgs[0]=packet[3];
 						logArgs[1]=packet[1];
@@ -169,22 +168,20 @@ public class ServerThread implements Runnable {
 							+ " " + packet[3];
 				} else if (packet[0].equalsIgnoreCase("Message")) {
 					if (packet[2].trim().equals("-1")
-							&& packet[5].startsWith("P|"))// 普通说话
+							&& packet[5].startsWith("P|"))
 					{
 
 					} else if (packet[2].trim().equals("-1")
-							&& !packet[5].startsWith("P|"))// 发送邮件给在线玩家
+							&& !packet[5].startsWith("P|"))
 					{
 
-					} else if (!packet[2].trim().equals("-1"))// 发送离线邮件
+					} else if (!packet[2].trim().equals("-1"))
 					{
 						Mail m = new Mail(packet);
-						// System.out.println(m.getToCdkey() + " " +
-						// m.getToRegNumber());
 						ml.addMail(m);
 						ml.writeToFile();
 					}
-				} else if (packet[0].equalsIgnoreCase("ACUCheckReq"))// 自动踢人
+				} else if (packet[0].equalsIgnoreCase("ACUCheckReq"))
 				{
 					int RegNumber = Tools.sixtyTwoScale(packet[1]);
 					String cdkey = packet[2];
@@ -301,8 +298,6 @@ public class ServerThread implements Runnable {
 						dr.writeToFile();
 					}
 				} else if (packet[0].equalsIgnoreCase("DBGetEntryRank")) { 
-					// 查看自己排名
-					// DBGetEntryRank 成功与否 (总数,目前数量,账号信息,值,str|) 表 账号信息
 					// packet[3] packet[4]
 					String cdkey = packet[2].split("#")[0];
 					int RegNumber = Tools
@@ -335,7 +330,7 @@ public class ServerThread implements Runnable {
 									+ packet[3] + " " + packet[4];
 						}
 					}
-				} else if (packet[0].equalsIgnoreCase("DBGetEntryByCount")) { // 查看所有排名
+				} else if (packet[0].equalsIgnoreCase("DBGetEntryByCount")) { 
 					if (packet[1].equals(TBL_GOLD)) {
 						int from = Tools.sixtyTwoScale(packet[2]);
 						ret = new String[1];
